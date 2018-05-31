@@ -1,0 +1,16 @@
+*Skins Manager
+*This agent doesn't really do anything other than sit around and hold
+*NAME variables pertaining to skins.
+*It's a library of sorts so we don't have to store everything in GAME vars.
+
+*there can only be ONE!!
+doif totl 1 2 22900 gt 0
+stop
+endi
+
+new: simp 1 2 22900 "blnk" 0 0 0
+
+rscr
+enum 1 2 22900
+kill targ
+next

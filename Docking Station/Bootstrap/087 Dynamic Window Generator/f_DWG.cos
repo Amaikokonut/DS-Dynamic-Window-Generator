@@ -1,0 +1,20 @@
+*CAOS FUNCTION*
+sets game "f_DWG" sorc 1 202 2 1000
+setv game "f_DWG:v" 1
+
+scrx 1 202 3 1000
+
+*THIS FUNCTION RELIES ON the Skins Manager agent (classifier 1 2 22900)
+
+*P1 the width in px, P2 is the height in px. 
+
+*If the function is run dependently, it will look at a bunch of variables
+*on the FROM (or TARG) agent and make changes accordingly
+
+*This function will return a string corresponding to an EAME variable that
+*points to the agent it has just created for you. 
+
+*Function will return "ok" if everything goes smoothly
+
+scrp 1 202 3 1000
+endm
