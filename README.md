@@ -6,7 +6,7 @@ After setup, it can be called with the line:
 `sets va00 caos 0 0 200 200 game "f_DWG" 0 0 va99`
 This will set va00 to the string name of an EAME variable pointing to the newly created 200x200 px window with the default skin and default classifier (1 6 22901).
 
-This is the simplest form of usage, but additional parameters may be passed through if you first set them in NAME variables of the agent that you are calling the function from. **THESE ARE CURRENTLY UNTESTED**  
+This is the simplest form of usage, but additional parameters may be passed through if you first set them in NAME variables of the agent that you are calling the function from. **THESE ARE CURRENTLY UNTESTED and probably don't work yet.**  
 
 * dwg-fmly (integer): Specify the family classification of the window
 * dwg-gnus (integer): Specify the genus classification of the window
