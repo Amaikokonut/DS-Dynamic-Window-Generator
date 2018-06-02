@@ -1,0 +1,23 @@
+enum 1 6 22901
+kill targ
+next
+
+sets va00 caos 0 0 500 100 game "f_DWG" 0 0 va99
+
+*center it on the screen
+targ eame va00
+
+setv va50 wndw
+divv va50 2
+setv va51 wndh
+divv va51 2
+setv va52 name "dwg-width"
+divv va52 2
+setv va53 name "dwg-height"
+divv va53 2
+
+subv va50 va52
+subv va51 va53
+
+flto va50 va51
+plne 9000
