@@ -9,7 +9,7 @@ scrx 1 202 3 1000
 *P1 the width in px, P2 is the height in px. 
 
 *If the function is run dependently, it will look at a bunch of variables
-*on the FROM (or TARG) agent and make changes accordingly
+*on the FROM (or TARG) agent and make changes accordingly.
 
 *This function will return a string corresponding to an EAME variable that
 *points to the agent it has just created for you. 
@@ -17,4 +17,327 @@ scrx 1 202 3 1000
 *Function will return "ok" if everything goes smoothly
 
 scrp 1 202 3 1000
+
+inst
+*va99 is the 'is the targ/ownr missing' flag
+	setv va99 0
+	doif targ eq null
+		targ ownr
+		doif targ eq null
+			setv va99 1
+		endi
+	endi
+
+* set the defaults first:
+* va01 -- family
+setv va01 1
+* va02 -- genus
+setv va02 6
+* va03 -- species
+setv va03 22901
+* va04 -- skin
+setv va04 "Default"
+* va05 -- border
+setv va05 "Default"
+* va06 -- tolerance
+setv va06 0
+* va07 -- width
+setv va07 _p1_
+* va08 -- height
+setv va08 _p2_
+
+*there's something to find namevars on... let's do it.
+doif va99 eq 1
+	seta va00 targ
+
+	doif name "dwg-fmly" gt 0
+		setv va01 name "dwg-fmly"
+	endi
+
+	doif name "dwg-gnus" gt 0
+		setv va02 name "dwg-gnus"
+	endi
+
+	doif name "dwg-spcs" gt 0
+		setv va03 name "dwg-spcs"
+	endi
+
+	doif type name "dwg-skin" eq 2
+		sets va04 name "dwg-skin"
+	endi
+
+	doif type name "dwg-border" eq 2
+		sets va05 name "dwg-border"
+	endi
+
+	doif name "dwg-tolerance" gt 0
+		setv va06 name "dwg-tolerance"
+	endi
+endi
+
+* get the Skin information!
+rtar 1 2 22900
+
+*va09 -- the skin sprite filename
+sets va09 va04
+adds va09 ":sprite"
+doif type name va09 ne 2
+	outs "#Invalid skin or skin sprite filename"
+	stop
+endi
+sets va09 name va09
+
+*va10 -- the border sprite filename
+doif va05 ne "none"
+	sets va10 va05
+	adds va10 "::border-sprite"
+		doif type name va09 ne 2
+			outs "#Invalid skin border or skin border-sprite filename"
+			stop
+		endi
+	sets va10 name va10
+else
+	sets va09 "none"
+endi
+
+*va11 -- minimum tile size
+sets va11 va04
+adds va11 ":min"
+doif name va11 eq 0
+	outs "#Invalid Minimum Tile Size"
+	stop
+endi
+setv va11 name va11
+
+*va12 -- maximum tile size
+sets va12 va04
+adds va12 ":max"
+doif name va12 eq 0
+	outs "#Invalid Maximum Tile Size"
+	stop
+endi
+setv va12 name va12
+
+*va13 -- multiplier
+sets va13 va04
+adds va13 ":multiplier"
+doif name va13 eq 0
+	outs "#Invalid Tile Size Multiplier"
+	stop
+endi
+setv va13 name va13
+
+*okay, this is the hard stuff -- figuring out how many tiles we need and of which kinds.
+*tiles are in order from Max Height (Max Width > Min Width) > Min Height
+*so starting with the height
+
+*va14 is the height you still have left to account for 
+setv va14 va08
+
+*va15 is the base name for the eame fake-array you're gonna use to track your tiles
+*get one that's not in use:
+sets va15 "temp-"
+adds va15 vtos eame "tempcounts"
+addv eame "tempcounts" 1
+adds va15 "-"
+
+*va16 is your tiles-index counter (begining at 1 because idk I just want to)
+setv va16 1
+
+*va17 is the tile size you are currently on
+setv va17 va12
+
+*va18 tracks your "level" in which 1 is the max tile size, 2 is tile size divided
+*by the muliplier, 3 is the level 2 sized divided by the multiplier, and so on. 
+setv va18 1
+
+*LET'S DO IT!
+gsub calc_tiles
+
+*okay, by now the tile levels that are going to work out for your height are 
+*stored in fake-array va15, the number of tiles are va16 - 1. So let's store those:
+sets va21 va15
+setv va22 va16
+subv va16 1
+
+*now it's time to do the same for the WIDTH. Basically we need to reset all the vars
+*and run the calc tiles loop again.
+
+*va14 is the width you still have left to account for 
+setv va14 va07
+
+*va15 is the base name for the eame fake-array you're gonna use to track your tiles
+*get one that's not in use:
+sets va15 "temp-"
+adds va15 vtos eame "tempcounts"
+addv eame "tempcounts" 1
+adds va15 "-"
+
+*va16 is your tiles-index counter (begining at 1 because idk I just want to)
+setv va16 1
+
+*va17 is the tile size you are currently on
+setv va17 va12
+
+*va18 tracks your "level" in which 1 is the max tile size, 2 is tile size divided
+*by the muliplier, 3 is the level 2 sized divided by the multiplier, and so on. 
+setv va18 1
+
+*ROUND 2!
+gsub calc_tiles
+
+* save the fake-array values 23-- name, 24-- length
+sets va23 va15
+setv va24 va16
+subv va16 1
+
+*alright, we have decided how many tiles we need and of what kind
+*now we need to translate that into sprite numbers
+
+*to do that, we first need to figure out how many Levels there are in your sprite
+setv va25 0
+*get max
+setv va17 va11
+loop
+	addv va25 1
+	divv va17 va13
+untl va17 le va12
+
+*okay, va25 is the number of levels. 
+*these are now going to be treated like coords, basically.
+*(1, 2) is height level 1, width level 2. 
+*sprite 0 is height level 1. Add va25 to get level 2. Add 2x va25 to get level 3, etc.
+*you can just add the width level to the height to get the final size, I hope!
+
+*va26 is your height-array index
+setv va26 1
+*va27 is your width-array index
+setv va27 1
+*va28 is your current x-pos
+setv va28 0
+*va29 is your current y-pos
+setv va29 0
+
+*va36 is your PART number!!
+setv va36 1
+
+
+*TIME TO MAKE THE AGENT!
+new: comp va01 va02 va03 "blnk" 0 0 5000
+
+*and now the parts:
+loop
+	sets va30 va21
+	adds va30 vtos va26
+	setv va31 eame va30
+
+	loop
+		sets va32 va23
+		adds va32 vtos va26
+		setv va33 eame va32 
+*		va31 is the height level, va31 is the width level...
+*		time to MAKE THE PART :D
+*		calculate the sprite number: va37
+*		sprite number = (height level - 1 * max levels) + width level
+		setv va37 va31
+		subv va37 1
+		mulv va37 va25
+		addv va37 va33
+
+*		this is the line we are all here for, friends:
+		pat: dull va36 va09 va28 va29 1
+*		increment the part
+		addv va36 1
+*		increment your x-pos
+		setv va17 va11
+*		first get your own size by dividing the max by the multiplier, level - 1 times
+		setv va35 va33
+		subv va35 1
+		doif va35 gt 0
+			reps va35
+				divv va17 va13
+			repe
+		endi
+
+*		actually setting the x-pos now
+		addv va28 va17
+*		increment the index
+		addv va27 1
+	untl va27 gt va24
+*	now to increment the y-pos...
+	setv va17 va11
+*	first get your own size by dividing the max by the multiplier, level - 1 times
+	setv va35 va31
+	subv va35 1
+	doif va31 gt 0
+		reps va31
+			divv va17 va13
+		repe
+	endi
+
+*	actually setting the y-pos now
+	addv va29 va17
+
+*	reset the x-pos if you still have another round to go:
+	doif va22 gt va26
+		setv va28 0	
+	endi
+	addv va26 1
+untl va26 gt va22
+
+*okay we need to add border stuff..... later. Implement that later.
+
+*set namevars to the final x/y placement
+setv name "dwg-height" va29
+setv name "dwg-width" va28
+
+*get a temp eame bar to return in 
+sets va15 "temp-"
+adds va15 vtos eame "tempcounts"
+addv eame "tempcounts" 1
+
+sets eame va15 targ
+outs va15
+
+
+*You did it!
+
+subr calc_tiles
+* HERE WE GO!
+loop
+*va19 is the space you have left to account for (va14) + tolerance (va06)
+	setv va19 va14
+	addv va19 va06
+* see if the current tile can fit into you!
+	doif va19 gt va17
+*	you can fit!
+*	did you only fit this because of tolorance?
+		doif va17 gt va14 
+*			then this is the last tile:
+			setv va14 0
+		else
+*			you didn't need tolerance
+			subv va14 va17
+		endi
+*	add this level to the list!
+*	va20 is the eame string plus the index
+	sets va20 va15 
+	adds va20 vtos va16
+*	actually setting it
+	setv eame va20 va18
+*	increment the index counter for next time!
+	addv va16 1
+	else
+*	this tile cannot fit into you-- you need to drop to a smaller tile.
+*	increment the level
+		addv va18 1
+*	divide your current tile size (va17) by the multiplier (va13)
+		divv va17 va13
+	endi
+untl va14 eq 0
+retn
+
+
+
+*TODO Later: make sure the border is compatible somehow, probably with some maths.
 endm
