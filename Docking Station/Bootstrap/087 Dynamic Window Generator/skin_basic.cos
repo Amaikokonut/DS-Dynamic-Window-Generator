@@ -6,9 +6,6 @@ rtar 1 2 22900
 sets name "Default:sprite" "dwg_default"
 sets name "Default:border-sprite" "dwg_default_border"
 
-setv name "Default:min-x" 1
-setv name "Default:min-y" 1
-setv name "Default:max-x" 512
-setv name "Default:max-y" 512
-setv name "Default:multiplier-x" 2
-setv name "Default:multiplier-y" 2
+setv name "Default:min" 1
+setv name "Default:max" 512
+setv name "Default:multiplier" 2
