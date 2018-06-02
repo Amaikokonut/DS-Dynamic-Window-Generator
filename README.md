@@ -6,13 +6,11 @@ After setup, it can be called with the line:
 `sets va00 caos 0 0 200 200 game "f_DWG" 0 0 va99`
 This will set va00 to the string name of an EAME variable pointing to the newly created 200x200 px window with the default skin and default classifier (1 6 22901).
 
-This is the simplest form of usage, but additional parameters may be passed through if you first set them in NAME variables of the agent that you are calling the function from: 
+This is the simplest form of usage, but additional parameters may be passed through if you first set them in NAME variables of the agent that you are calling the function from. **THESE ARE CURRENTLY UNTESTED**  
 
 * dwg-fmly (integer): Specify the family classification of the window
 * dwg-gnus (integer): Specify the genus classification of the window
 * dwg-spcs (integer): Specify the species classification of the window
 * dwg-skin (string): Specify the name of the skin you wish to use. The default skin is "Default". Other skins can be added via the Skins Manager agent.
-* dwg-border (string): Specify the name of the border skin you wish to use, if it is different than the skin. Note that if these are incompatible, the default skin will be used. You may also specify "none"
+* dwg-border (string): Specify the name of the border skin you wish to use, if it is different than the skin. Note that if these are incompatible, the default skin will be used. You may also specify "none" **This is not yet implemented**
 * dwg-tolerance (integer): Specify from 0 to any number, how many px the generator is allowed to round up to. If you don't need your window to be a perfectly exact size, setting this higher will result in a more quickly generated window that is easier on system resources. The actual resulting dimensions will be found in NAME variables of the returned agent: dwg-height/dwg-width. Note that skins and borders may have forced tolorance. Forced tolorance will also happen if your window has too many parts.
-
-The newly generated background agent will be created with script 1022 on it, the "binding" script. You can mesg writ this script from the agent that you wish to bind. Once bound, the background will float relative to that agent and also kill itself if that agent no longer exists.
