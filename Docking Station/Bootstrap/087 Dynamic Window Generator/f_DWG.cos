@@ -23,9 +23,9 @@ scrp 1 202 3 1000
 	doif targ eq null
 		dbg: outs "there's no targ"
 		doif from eq null
-		dbg: outs "there's no from"
+			dbg: outs "there's no from"
 			setv va99 1
-			else
+		else
 			targ from
 		endi
 	endi
@@ -47,6 +47,8 @@ scrp 1 202 3 1000
 	setv va07 _p1_
 * va08 -- height
 	setv va08 _p2_
+* va98 -- remake flag
+	setv va98 0
 
 *there's something to find namevars on... let's do it.
 	doif va99 ne 1
@@ -74,6 +76,11 @@ scrp 1 202 3 1000
 
 		doif name "dwg-tolerance" gt 0
 			setv va06 name "dwg-tolerance"
+		endi
+
+		doif name "dwg-remake" gt 0
+			setv va98 name "dwg-remake"
+			seta va96 targ
 		endi
 	endi
 
@@ -233,15 +240,30 @@ scrp 1 202 3 1000
 
 
 *TIME TO MAKE THE AGENT!
-	new: comp va01 va02 va03 "blnk" 0 0 5000
-	attr 302
+
+*unless the "remake" flag is set:
+	doif va98 gt 0
+	targ va96
+	dbg: outs "remaking the current agent"
+*  you're just remaking yourself!
+		setv va97 1
+		loop
+			pat: kill va97
+			addv va97 1
+		untl part va97 eq 0
+
+	else
+		dbg: outs "making a new agent"
+		new: comp va01 va02 va03 "blnk" 0 0 5000
+		attr 302
+	endi
 
 *and now the parts:
 	loop
 		sets va30 va21
 		adds va30 vtos va26
 		setv va31 eame va30
-		dbg: outs "checking eame var:" 
+		dbg: outs "checking eame var:"
 		dbg: outs "your height level for this tile is:"
 		dbg: outv va31
 
@@ -250,8 +272,8 @@ scrp 1 202 3 1000
 			adds va32 vtos va27
 			setv va33 eame va32
 *		va31 is the height level, va31 is the width level...
-		dbg: outs "your width level for this tile is:"
-		dbg: outv va33
+			dbg: outs "your width level for this tile is:"
+			dbg: outv va33
 *		time to MAKE THE PART :D
 *		calculate the sprite number: va37
 *		sprite number = (height level - 1 * max levels) + width level - 1
@@ -310,7 +332,7 @@ scrp 1 202 3 1000
 *		increment the height index
 		addv va26 1
 *		reset the width indez
-		setv va27 1 
+		setv va27 1
 	untl va26 gt va22
 
 *okay we need to add border stuff..... later. Implement that later.
@@ -321,6 +343,11 @@ scrp 1 202 3 1000
 	dbg: outv va28
 	dbg: outv va29
 
+* set extra vars according to your creation so remaking is easier:
+	sets name "dwg-skin" va04
+	sets name "dwg-border" va05
+	setv name "dwg-tolerance" va06
+	setv name "dwg-remake" va98
 
 *get a temp eame bar to return in 
 	sets va15 "temp-"
