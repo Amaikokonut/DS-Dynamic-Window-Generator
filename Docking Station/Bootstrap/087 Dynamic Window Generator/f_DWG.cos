@@ -18,12 +18,15 @@ scrx 1 202 3 1000
 
 scrp 1 202 3 1000
 	inst
-*va99 is the 'is the targ/ownr missing' flag
+*va99 is the 'is the targ/from missing' flag
 	setv va99 0
 	doif targ eq null
-		targ ownr
-		doif targ eq null
+		dbg: outs "there's no targ"
+		doif from eq null
+		dbg: outs "there's no from"
 			setv va99 1
+			else
+			targ from
 		endi
 	endi
 
